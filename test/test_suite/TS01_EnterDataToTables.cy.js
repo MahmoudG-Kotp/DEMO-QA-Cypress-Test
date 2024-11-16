@@ -40,13 +40,13 @@ describe('As a user, I can enter new data into the table', () => {
     // Then: Verify that the entered data is displayed in the table
     cy.log('Then: The data should be displayed in the table');
     webtable_form.compareEnteredWithFoundData().then((isMatch) => {
-      // Assert based on whether data was found and matched
       if (isMatch) {
-        cy.log('Test case succeeded: Entered and found data matched.');
+          cy.log('Test case succeeded: Entered and found data matched.');
       } else {
-        cy.log('Test case failed: Entered and found data did not match!!.');
+          cy.log('Test case failed: Entered and found data did not match!');
       }
-      expect(isMatch).to.be.true; // This will cause the test to fail if `isMatch` is false
-    });
+      expect(isMatch).to.be.true; // Assert the result
+  });
+
   });
 });

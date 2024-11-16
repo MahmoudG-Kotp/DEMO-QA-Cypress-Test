@@ -107,57 +107,64 @@ class P02_WebTableForm {
         return P02_WebTableForm.entered_user;
     }
 
-    compareEnteredWithFoundData() {
-        const enteredUserData = P02_WebTableForm.getEnteredUser();
-        
+    getDataFromTable(firstName) {
         return new Cypress.Promise((resolve) => {
-            let found = false;
+            let foundData = null;
             cy.get('.rt-tr-group>.rt-tr>.rt-td:nth-child(1)').each(($el, index) => {
                 const currentFirstName = $el.text().trim();
-
-                if (currentFirstName === enteredUserData.firstName) {
-                    found = true;
+    
+                if (currentFirstName === firstName) {
                     cy.get(`.rt-tr-group>.rt-tr`).eq(index).within(() => {
-                        cy.get('.rt-td').then($cells => {
-                            const foundData = {
+                        cy.get('.rt-td').then(($cells) => {
+                            foundData = {
                                 firstName: $cells.eq(0).text().trim(),
                                 lastName: $cells.eq(1).text().trim(),
                                 age: parseInt($cells.eq(2).text().trim()),
                                 email: $cells.eq(3).text().trim(),
                                 salary: parseInt($cells.eq(4).text().trim()),
-                                department: $cells.eq(5).text().trim()
+                                department: $cells.eq(5).text().trim(),
                             };
-                            
-                            const isMatch = 
-                            foundData.firstName === enteredUserData.firstName &&
-                            foundData.lastName === enteredUserData.lastName &&
-                            foundData.email === enteredUserData.email &&
-                            foundData.age === enteredUserData.age &&
-                            foundData.salary === enteredUserData.salary &&
-                            foundData.department === enteredUserData.department;
-                           
-                            /**
-                             * Comparison LOG
-                            cy.log(
-                                `Comparison Results:
-                                 Found First Name: ${foundData.firstName} | Entered First Name: ${enteredUserData.firstName} | Match: ${foundData.firstName === enteredUserData.firstName}
-                                 Found Last Name: ${foundData.lastName} | Entered Last Name: ${enteredUserData.lastName} | Match: ${foundData.lastName === enteredUserData.lastName}
-                                 Found Email: ${foundData.email} | Entered Email: ${enteredUserData.email} | Match: ${foundData.email === enteredUserData.email}
-                                 Found Age: ${foundData.age} | Entered Age: ${enteredUserData.age} | Match: ${foundData.age === enteredUserData.age}
-                                 Found Salary: ${foundData.salary} | Entered Salary: ${enteredUserData.salary} | Match: ${foundData.salary === enteredUserData.salary}
-                                 Found Department: ${foundData.department} | Entered Department: ${enteredUserData.department} | Match: ${foundData.department === enteredUserData.department}`
-                              );
-                            */
-                            resolve(isMatch);
+                            resolve(foundData);
                         });
                     });
-                    return false;
+                    return false; // Exit the loop early
                 }
             }).then(() => {
-                if (!found) {
-                    resolve(false);
+                if (!foundData) {
+                    resolve(null); // Resolve as null if no match found
                 }
             });
+        });
+    }
+
+    compareEnteredWithFoundData() {
+        const enteredUserData = P02_WebTableForm.getEnteredUser();
+    
+        return this.getDataFromTable(enteredUserData.firstName).then((foundData) => {
+            if (!foundData) {
+                return false; // No match found
+            }
+    
+            const isMatch =
+                foundData.firstName === enteredUserData.firstName &&
+                foundData.lastName === enteredUserData.lastName &&
+                foundData.email === enteredUserData.email &&
+                foundData.age === enteredUserData.age &&
+                foundData.salary === enteredUserData.salary &&
+                foundData.department === enteredUserData.department;
+    
+            // Log comparison results
+            cy.log(
+                `Comparison Results:
+                Found First Name: ${foundData.firstName} | Entered First Name: ${enteredUserData.firstName} | Match: ${foundData.firstName === enteredUserData.firstName}
+                Found Last Name: ${foundData.lastName} | Entered Last Name: ${enteredUserData.lastName} | Match: ${foundData.lastName === enteredUserData.lastName}
+                Found Email: ${foundData.email} | Entered Email: ${enteredUserData.email} | Match: ${foundData.email === enteredUserData.email}
+                Found Age: ${foundData.age} | Entered Age: ${enteredUserData.age} | Match: ${foundData.age === enteredUserData.age}
+                Found Salary: ${foundData.salary} | Entered Salary: ${enteredUserData.salary} | Match: ${foundData.salary === enteredUserData.salary}
+                Found Department: ${foundData.department} | Entered Department: ${enteredUserData.department} | Match: ${foundData.department === enteredUserData.department}`
+            );
+    
+            return isMatch;
         });
     }
 }

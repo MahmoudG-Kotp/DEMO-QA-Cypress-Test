@@ -1,3 +1,5 @@
+import { is, resolve } from "bluebird";
+
 class PracticeForm {
     // Private fields for each form element
     #firstName;
@@ -257,13 +259,10 @@ class P03_PracticeForm {
         return P03_PracticeForm.entered_practice_form;
     }
 
-    compareEnteredWithFoundDataForPracticeForm() {
-        const enteredPracticeFormData = P03_PracticeForm.getEnteredPracticeForm();
-
+    getDataFromForm(){
         return new Cypress.Promise((resolve) => {
             let foundData = {};
-
-            // Iterate over each row and capture data
+            
             cy.get('tbody > tr').each(($row) => {
                 const label = $row.find('td').first().text().trim();
                 const value = $row.find('td').eq(1).text().trim();
@@ -302,42 +301,48 @@ class P03_PracticeForm {
                         break;
                     default:
                         break;
-                }
-            }).then(() => {
-                // Helper function to normalize strings (remove spaces and lowercase)
-                const normalize = (str) => str.toLowerCase().replace(/\s+/g, '').trim();
-
-                // Log all collected data at once
-                cy.log(
-                    `Comparison Results:
-                     Found Student Name: ${foundData.studentName}, Expected: ${enteredPracticeFormData.firstName} ${enteredPracticeFormData.lastName}
-                     Found Student Email: ${foundData.studentEmail}, Expected: ${enteredPracticeFormData.email}
-                     Found Gender: ${foundData.gender}, Expected: ${enteredPracticeFormData.gender}
-                     Found Mobile: ${foundData.mobile}, Expected: ${enteredPracticeFormData.userNumber}
-                     Found Date of Birth: ${foundData.dob}, Expected: ${enteredPracticeFormData.dateOfBirthInput}
-                     Found Subjects: ${foundData.subjects}, Expected: ${enteredPracticeFormData.subjects.join(', ')}
-                     Found Hobbies: ${foundData.hobbies}, Expected: ${enteredPracticeFormData.hobbies.join(', ')}
-                     Found Picture: ${foundData.picture}, Expected: ${enteredPracticeFormData.uploadPicture}
-                     Found Address: ${foundData.address}, Expected: ${enteredPracticeFormData.currentAddress}
-                     Found State and City: ${foundData.stateCity}, Expected: ${enteredPracticeFormData.state} ${enteredPracticeFormData.city}`
-                );
-
-                // Compare all collected data with expected values using normalized comparison
-                const isMatch = 
-                    normalize(foundData.studentName) === normalize(`${enteredPracticeFormData.firstName} ${enteredPracticeFormData.lastName}`) &&
-                    normalize(foundData.studentEmail) === normalize(enteredPracticeFormData.email) &&
-                    normalize(foundData.gender) === normalize(enteredPracticeFormData.gender) &&
-                    normalize(foundData.mobile) === normalize(enteredPracticeFormData.userNumber) &&
-                    normalize(foundData.dob) === normalize(enteredPracticeFormData.dateOfBirthInput) &&
-                    normalize(foundData.subjects) === normalize(enteredPracticeFormData.subjects.join(', ')) &&
-                    normalize(foundData.hobbies) === normalize(enteredPracticeFormData.hobbies.join(', ')) &&
-                    normalize(foundData.picture) === normalize(enteredPracticeFormData.uploadPicture) &&
-                    normalize(foundData.address) === normalize(enteredPracticeFormData.currentAddress) &&
-                    normalize(foundData.stateCity) === normalize(`${enteredPracticeFormData.state} ${enteredPracticeFormData.city}`);
-
-                // Resolve based on whether all comparisons matched
-                resolve(isMatch);
+                } 
+            }).then(()=>{
+                resolve(foundData);
             });
+        });
+    }
+
+    compareEnteredDataWithFoundData(){
+        return this.getDataFromForm().then((foundData) => {
+            const enteredPracticeFormData = P03_PracticeForm.getEnteredPracticeForm();
+            // Helper function to normalize strings (remove spaces and lowercase)
+            const normalize = (str) => str.toLowerCase().replace(/\s+/g, '').trim();
+            
+            // Log all collected data at once
+            cy.log(
+                `Comparison Results:
+                Found Student Name: ${foundData.studentName}, Expected: ${enteredPracticeFormData.firstName} ${enteredPracticeFormData.lastName}
+                Found Student Email: ${foundData.studentEmail}, Expected: ${enteredPracticeFormData.email}
+                Found Gender: ${foundData.gender}, Expected: ${enteredPracticeFormData.gender}
+                Found Mobile: ${foundData.mobile}, Expected: ${enteredPracticeFormData.userNumber}
+                Found Date of Birth: ${foundData.dob}, Expected: ${enteredPracticeFormData.dateOfBirthInput}
+                Found Subjects: ${foundData.subjects}, Expected: ${enteredPracticeFormData.subjects.join(', ')}
+                Found Hobbies: ${foundData.hobbies}, Expected: ${enteredPracticeFormData.hobbies.join(', ')}
+                Found Picture: ${foundData.picture}, Expected: ${enteredPracticeFormData.uploadPicture}
+                Found Address: ${foundData.address}, Expected: ${enteredPracticeFormData.currentAddress}
+                Found State and City: ${foundData.stateCity}, Expected: ${enteredPracticeFormData.state} ${enteredPracticeFormData.city}`
+            );
+
+            // Compare all collected data with expected values using normalized comparison
+            const isMatch = 
+                normalize(foundData.studentName) === normalize(`${enteredPracticeFormData.firstName} ${enteredPracticeFormData.lastName}`) &&
+                normalize(foundData.studentEmail) === normalize(enteredPracticeFormData.email) &&
+                normalize(foundData.gender) === normalize(enteredPracticeFormData.gender) &&
+                normalize(foundData.mobile) === normalize(enteredPracticeFormData.userNumber) &&
+                normalize(foundData.dob) === normalize(enteredPracticeFormData.dateOfBirthInput) &&
+                normalize(foundData.subjects) === normalize(enteredPracticeFormData.subjects.join(', ')) &&
+                normalize(foundData.hobbies) === normalize(enteredPracticeFormData.hobbies.join(', ')) &&
+                normalize(foundData.picture) === normalize(enteredPracticeFormData.uploadPicture) &&
+                normalize(foundData.address) === normalize(enteredPracticeFormData.currentAddress) &&
+                normalize(foundData.stateCity) === normalize(`${enteredPracticeFormData.state} ${enteredPracticeFormData.city}`);
+
+                return isMatch;
         });
     }
 }

@@ -43,7 +43,7 @@ describe('As a user, I can submit new form', () => {
 
     // Then: Verify that the entered data is displayed in the table
     cy.log('Then: The data should be displayed in the table');
-    practice_form.compareEnteredWithFoundDataForPracticeForm().then((isMatch) => {
+    practice_form.compareEnteredDataWithFoundData().then((isMatch) => {
       // Assert based on whether data was found and matched
       if (isMatch) {
         cy.log('Test case succeeded: Entered and found data matched.');
